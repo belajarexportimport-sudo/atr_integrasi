@@ -17,10 +17,10 @@
 
         /* ATR Theme Colors extracted from image */
         :root {
-            --atr-brown: #654321;
-            /* Approximate dark brown from header */
-            --atr-gold: #C5A065;
-            /* Approximate gold from button */
+            --atr-brown: #8B4513;
+            /* Classic Saddle Brown */
+            --atr-gold: #C9A961;
+            /* The Official Golden/Amber Color */
         }
 
         .text-atr-brown {
@@ -62,10 +62,10 @@
     <!-- Navbar -->
     <nav class="border-b border-slate-100 py-4">
         <div class="container mx-auto px-6 flex justify-between items-center">
-            <a href="#" class="text-2xl font-extrabold text-blue-700 tracking-tighter flex items-center gap-2">
-                <i data-lucide="truck" class="text-orange-500"></i> ATR EXPRESS
+            <a href="#" class="text-2xl font-extrabold text-atr-brown tracking-tighter flex items-center gap-2">
+                <i data-lucide="truck" class="text-atr-gold"></i> ATR EXPRESS
             </a>
-            <a href="admin-generate.html" class="text-sm font-semibold text-slate-500 hover:text-blue-600">Admin
+            <a href="admin-generate.html" class="text-sm font-semibold text-slate-500 hover:text-atr-brown">Admin
                 Login</a>
         </div>
     </nav>
@@ -78,10 +78,10 @@
 
             <div class="relative max-w-lg mx-auto">
                 <input type="text" id="resi-input" placeholder="Contoh: ATR-2026..."
-                    class="w-full p-4 pl-12 rounded-xl text-lg border border-slate-300 shadow-sm focus:ring-4 focus:ring-blue-100 outline-none uppercase font-mono">
+                    class="w-full p-4 pl-12 rounded-xl text-lg border border-slate-300 shadow-sm focus:ring-4 focus:ring-amber-100 outline-none uppercase font-mono">
                 <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
                 <button onclick="track()"
-                    class="absolute right-2 top-2 bottom-2 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors">
+                    class="absolute right-2 top-2 bottom-2 px-6 bg-atr-gold hover:bg-yellow-600 text-white font-bold rounded-lg transition-colors">
                     Cek Resi
                 </button>
             </div>

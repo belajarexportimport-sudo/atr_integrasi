@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Tracking - ATR Express</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #C9A961;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: #C9A961;
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #B8941F;
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #d4edda;
+            border-radius: 4px;
+        }
+
+        .result h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .tracking-number {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+            color: #2c3e50;
+            letter-spacing: 2px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Generate Tracking Number</h1>
+            <p>ATR Express International - Staff Only</p>
+        </div>
+
+        <form id="trackingForm">
+            <div class="form-group">
+                <label>Customer Name *</label>
+                <input type="text" id="customerName" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phone *</label>
+                <input type="text" id="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label>Origin *</label>
+                <input type="text" id="origin" required>
+            </div>
+
+            <div class="form-group">
+                <label>Destination *</label>
+                <input type="text" id="destination" required>
+            </div>
+
+            <div class="form-group">
+                <label>Service Type *</label>
+                <select id="serviceType" required>
+                    <option value="">-- Select Service --</option>
+                    <option value="Express">Express</option>
+                    <option value="Regular">Regular</option>
+                    <option value="Economy">Economy</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Weight (kg) *</label>
+                <input type="number" id="weight" step="0.1" min="0.1" required>
+            </div>
+
+            <button type="submit" class="btn">Generate Tracking Number</button>
+        </form>
+
+        <div id="result" class="result">
+            <h3>✅ Success!</h3>
+            <div id="trackingNumber" class="tracking-number"></div>
+            <p style="text-align: center; color: #155724;">Tracking number has been generated and saved to Google
+                Sheets!</p>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGWqAOKQTuBnFtCjEq5CczzqcjS1mKjuM26VqYA0c8ioaZFmtj4JgwpfTZ3s3tNHoX/exec';
+
+        // --- SUPABASE CONFIGURATION ---
+        const SB_URL = 'https://ewquycutqbtagjlokvyn.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3cXV5Y3V0cWJ0YWdqbG9rdnluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MTI3MjYsImV4cCI6MjA4NTE4ODcyNn0.FhdCAcK7nxIUk7zdoqxX9xyrjCslBUPXRBiWgugXu3s';
+
+        // Initialize Supabase Client (via CDN, will be loaded in body)
+        let _sbClient;
+
+        window.onload = function () {
+            if (window.supabase) {
+                _sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+                console.log('Supabase initialized');
+            } else {
+                console.error('Supabase library not loaded');
+            }
+        };
+
+        document.getElementById('trackingForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            console.log('=== FORM SUBMITTED ===');
+
+            const customerName = document.getElementById('customerName').value;
+            const phone = document.getElementById('phone').value;
+            const origin = document.getElementById('origin').value;
+            const destination = document.getElementById('destination').value;
+            const serviceType = document.getElementById('serviceType').value;
+            const weight = document.getElementById('weight').value;
+
+            const formData = new URLSearchParams({
+                action: 'generate',
+                customer_name: customerName,
+                phone: phone,
+                origin: origin,
+                destination: destination,
+                service_type: serviceType,
+                weight: weight
+            });
+
+            console.log('Form data:', formData.toString());
+            console.log('Sending POST to:', GOOGLE_SCRIPT_URL);
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                console.log('Response status:', response.status);
+
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (data.success) {
+                    console.log('SUCCESS! Tracking number:', data.tracking_number);
+                    document.getElementById('trackingNumber').textContent = data.tracking_number;
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('trackingForm').reset();
+
+                    // --- SYNC TO SUPABASE ---
+                    await syncToSupabase(data.tracking_number, {
+                        customer_name: customerName,
+                        origin: origin,
+                        destination: destination,
+                        service_type: serviceType
+                    });
+
+                } else {
+                    console.error('Server error:', data.message);
+                    alert('Error: ' + (data.message || 'Failed to generate tracking number'));
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                alert('Error generating tracking number. Check console for details.');
+            }
+        });
+
+        async function syncToSupabase(awb, meta) {
+            if (!_sbClient) {
+                console.error('Supabase client not initialized');
+                return;
+            }
+
+            console.log('🔄 Syncing to Supabase:', awb);
+
+            // 1. Login Anonymously (or as a specific bot user if RLS enforces 'authenticated')
+            // For now, assuming Anon Insert is allowed OR we do a swift login
+            // Since we can't easily do email/pass here without exposing credentials too explicitly,
+            // We will try Anon Insert. If it fails, I will instruct User to relax RLS.
+
+            const payload = {
+                awb_number: awb,
+                status: 'Created',
+                location: meta.origin,
+                description: `Shipment created. Customer: ${meta.customer_name}, Dest: ${meta.destination}`,
+                is_manual: true,
+                occurred_at: new Date().toISOString()
+            };
+
+            const { data, error } = await _sbClient
+                .from('tracking_events')
+                .insert([payload]);
+
+            if (error) {
+                console.error('❌ Supabase Sync Failed:', error);
+                alert('Warning: Saved to GSheet but failed to sync to New App: ' + error.message);
+            } else {
+                console.log('✅ Supabase Sync Success:', data);
+            }
+        }
+    </script>
+</body>
+
+</html>

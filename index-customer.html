@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lacak Kiriman - ATR Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ATR Theme Colors extracted from image */
+        :root {
+            --atr-brown: #654321;
+            /* Approximate dark brown from header */
+            --atr-gold: #C5A065;
+            /* Approximate gold from button */
+        }
+
+        .text-atr-brown {
+            color: var(--atr-brown);
+        }
+
+        .bg-atr-brown {
+            background-color: var(--atr-brown);
+        }
+
+        .border-atr-brown {
+            border-color: var(--atr-brown);
+        }
+
+        .text-atr-gold {
+            color: var(--atr-gold);
+        }
+
+        .bg-atr-gold {
+            background-color: var(--atr-gold);
+        }
+
+        .hover\:bg-atr-gold-dark:hover {
+            background-color: #B08D55;
+        }
+
+        .border-atr-gold {
+            border-color: var(--atr-gold);
+        }
+
+        .accent-atr-gold {
+            accent-color: var(--atr-gold);
+        }
+    </style>
+</head>
+
+<body class="bg-white">
+
+    <!-- Navbar -->
+    <nav class="border-b border-slate-100 py-4">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <a href="#" class="text-2xl font-extrabold text-blue-700 tracking-tighter flex items-center gap-2">
+                <i data-lucide="truck" class="text-orange-500"></i> ATR EXPRESS
+            </a>
+            <a href="admin-generate.html" class="text-sm font-semibold text-slate-500 hover:text-blue-600">Admin
+                Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero / Tracking Section -->
+    <section class="py-16 bg-slate-50 border-b border-slate-200">
+        <div class="container mx-auto px-6 max-w-2xl text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-6">Lacak Paket Anda</h1>
+            <p class="text-slate-500 mb-8">Masukkan nomor resi (AWB) untuk mengetahui status pengiriman terkini.</p>
+
+            <div class="relative max-w-lg mx-auto">
+                <input type="text" id="resi-input" placeholder="Contoh: ATR-2026..."
+                    class="w-full p-4 pl-12 rounded-xl text-lg border border-slate-300 shadow-sm focus:ring-4 focus:ring-blue-100 outline-none uppercase font-mono">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                <button onclick="track()"
+                    class="absolute right-2 top-2 bottom-2 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors">
+                    Cek Resi
+                </button>
+            </div>
+            <p id="error-msg" class="text-red-500 mt-4 hidden font-medium">Resi tidak ditemukan. Mohon cek kembali.</p>
+        </div>
+    </section>
+
+    <!-- Inquiry Order Form Section -->
+    <section class="py-16 bg-white border-b border-slate-200">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-atr-brown">Form Order Inquiry</h2>
+                <p class="text-slate-500 mt-2">Dapatkan penawaran pengiriman terbaik dengan mengisi detail berikut.</p>
+            </div>
+
+            <form class="space-y-8 bg-slate-50 p-8 rounded-2xl border border-slate-200 shadow-sm">
+
+                <!-- 1. Shipment Specification -->
+                <div>
+                    <h3 class="text-lg font-bold text-atr-brown mb-4 flex items-center gap-2">
+                        <i data-lucide="package" class="w-5 h-5 text-atr-gold"></i> Shipment Specification
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Transport Mode</label>
+                            <div class="flex gap-4">
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-300 hover:border-atr-gold transition">
+                                    <input type="radio" name="mode" value="AIR" class="accent-atr-gold">
+                                    <span class="font-medium text-slate-700">AIR</span>
+                                </label>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-300 hover:border-atr-gold transition">
+                                    <input type="radio" name="mode" value="SEA" class="accent-atr-gold">
+                                    <span class="font-medium text-slate-700">SEA</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Container Type</label>
+                            <div class="flex gap-4">
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-300 hover:border-atr-gold transition">
+                                    <input type="radio" name="container" value="FCL" class="accent-atr-gold">
+                                    <span class="font-medium text-slate-700">FCL</span>
+                                </label>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-300 hover:border-atr-gold transition">
+                                    <input type="radio" name="container" value="LCL" class="accent-atr-gold">
+                                    <span class="font-medium text-slate-700">LCL</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-200">
+
+                <!-- 2. Route & Cargo Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">POL (Port of Loading)</label>
+                        <input type="text"
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                            placeholder="Origin Port">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">POD (Port of Discharge)</label>
+                        <input type="text"
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                            placeholder="Destination Port">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Gross Weight (GW)</label>
+                        <input type="text"
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                            placeholder="Total kg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Dimension</label>
+                        <input type="text"
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                            placeholder="L x W x H (cm)">
+                    </div>
+                </div>
+
+                <!-- 3. Commodity & Terms -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Commodity Details</label>
+                    <textarea rows="2"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                        placeholder="Description, DG Class (MSDS), Frozen Temp, etc."></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">HS Code</label>
+                        <input type="text"
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                            placeholder="Optional">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Incoterm</label>
+                        <select
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none bg-white">
+                            <option>ExWorks (EXW)</option>
+                            <option>FOB</option>
+                            <option>CIF</option>
+                            <option>DDP</option>
+                            <option>DAP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Export/Import License</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="license" value="Yes" class="accent-atr-gold"> Yes
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="license" value="No" class="accent-atr-gold" checked> No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Address -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Pick Up Address</label>
+                        <textarea rows="2"
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                            placeholder="Full Address"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Delivery Address</label>
+                        <textarea rows="2"
+                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-100 focus:border-atr-gold outline-none"
+                            placeholder="Full Address"></textarea>
+                    </div>
+                </div>
+
+                <div class="text-right pt-4">
+                    <button type="button" onclick="alert('Permintaan terkirim! Tim kami akan segera menghubungi Anda.')"
+                        class="px-8 py-3 bg-atr-gold hover:bg-atr-gold-dark text-white font-bold rounded-xl shadow-lg transition-colors flex items-center gap-2 ml-auto">
+                        <i data-lucide="send"></i> Kirim Inquiry
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </section>
+
+    <!-- Result Section -->
+    <section id="result-section" class="py-12 hidden">
+        <div class="container mx-auto px-6 max-w-2xl">
+
+            <!-- Summary Card -->
+            <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-6 mb-8">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b pb-4">
+                    <div>
+                        <p class="text-sm text-slate-400 font-medium">No Resi (AWB)</p>
+                        <h2 id="display-resi" class="text-2xl font-bold text-blue-700 font-mono tracking-tight"></h2>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <p class="text-sm text-slate-400 font-medium">Status Terkini</p>
+                        <span id="display-status"
+                            class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-bold border border-green-200"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-slate-400">Pengirim</p>
+                        <p id="display-sender" class="font-bold text-slate-800 text-lg"></p>
+                        <p id="display-origin" class="text-slate-500"></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-slate-400">Penerima</p>
+                        <p id="display-receiver" class="font-bold text-slate-800 text-lg"></p>
+                        <p id="display-destination" class="text-slate-500"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="relative">
+                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <i data-lucide="clock"></i> Riwayat Perjalanan
+                </h3>
+                <div class="absolute left-8 top-10 bottom-0 w-0.5 bg-slate-200"></div>
+
+                <div id="timeline-container" class="space-y-6">
+                    <!-- Timeline items injected here -->
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        lucide.createIcons();
+        lucide.createIcons();
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGWqAOKQTuBnFtCjEq5CczzqcjS1mKjuM26VqYA0c8ioaZFmtj4JgwpfTZ3s3tNHoX/exec';
+
+        async function track() {
+            const input = document.getElementById('resi-input').value.trim();
+            if (!input) {
+                alert('Mohon masukkan nomor resi');
+                return;
+            }
+
+            // Show Loading State
+            const btn = document.querySelector('button[onclick="track()"]');
+            const originalText = btn.innerText;
+            btn.innerText = '🔍 Checking...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?awb=${input}`);
+                const data = await response.json();
+
+                if (!data.found) {
+                    document.getElementById('error-msg').classList.remove('hidden');
+                    document.getElementById('result-section').classList.add('hidden');
+                } else {
+                    document.getElementById('error-msg').classList.add('hidden');
+                    document.getElementById('result-section').classList.remove('hidden');
+
+                    // Populate Summary
+                    document.getElementById('display-resi').innerText = data.awb;
+                    document.getElementById('display-status').innerText = data.status;
+                    document.getElementById('display-sender').innerText = data.customer_name || '-'; // API might not return sender, using customer_name
+                    document.getElementById('display-receiver').innerText = data.destination || '-'; // Mapping data.destination to Receiver field for now as API structure differs slightly
+                    document.getElementById('display-origin').innerText = data.origin;
+                    document.getElementById('display-destination').innerText = data.destination;
+
+                    // Populate Timeline
+                    const timelineContainer = document.getElementById('timeline-container');
+                    timelineContainer.innerHTML = '';
+
+                    // Data history from API is already sorted (if not, we sort it)
+                    const logs = data.history || [];
+
+                    if (logs.length === 0) {
+                        timelineContainer.innerHTML = '<p class="text-slate-500 italic">Belum ada riwayat perjalanan.</p>';
+                    }
+
+                    logs.forEach((log, index) => {
+                        const isLatest = index === 0;
+                        const dotClass = isLatest ? 'bg-blue-500 ring-4 ring-blue-100' : 'bg-slate-300';
+                        const textClass = isLatest ? 'text-slate-800' : 'text-slate-500';
+
+                        const el = document.createElement('div');
+                        el.className = 'relative flex gap-6 items-start';
+                        el.innerHTML = `
+                            <div class="w-20 mt-1 text-xs text-right text-slate-400 font-mono leading-tight">
+                                ${log.timestamp}
+                            </div>
+                            <div class="relative z-10 w-4 h-4 rounded-full ${dotClass} mt-1.5 flex-shrink-0"></div>
+                            <div class="pb-6 flex-1 border-b border-slate-100 last:border-0 last:pb-0">
+                                <p class="${textClass} font-medium">${log.status}</p>
+                                <p class="text-xs text-slate-400">${log.location}</p>
+                            </div>
+                        `;
+                        timelineContainer.appendChild(el);
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal mengambil data. Periksa koneksi internet.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

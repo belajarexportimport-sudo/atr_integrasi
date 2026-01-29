@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Shipment - ATR Express</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #C9A961;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .btn {
+            background: #C9A961;
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #B8941F;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .error {
+            display: none;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .result {
+            display: none;
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #C9A961 0%, #B8941F 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .status-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+
+        .status-card .tracking-num {
+            font-size: 18px;
+            opacity: 0.9;
+            letter-spacing: 2px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #C9A961;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .info-item .value {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .history-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 3px solid #C9A961;
+        }
+
+        .history-item .status {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .history-item .details {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Track Your Shipment</h1>
+            <p>Enter your tracking number to see real-time updates</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="trackingInput" placeholder="Enter tracking number (e.g., ATR-20260115-0002)">
+            <button class="btn" onclick="trackShipment()">Track</button>
+        </div>
+
+        <div id="loading" class="loading">
+            <p>Searching for your shipment...</p>
+        </div>
+
+        <div id="error" class="error">
+            <h3>❌ Tracking Number Not Found</h3>
+            <p>Please check your tracking number and try again.</p>
+        </div>
+
+        <div id="result" class="result">
+            <div class="status-card">
+                <h2 id="currentStatus">In Transit</h2>
+                <div class="tracking-num" id="displayTracking"></div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Customer</label>
+                    <div class="value" id="customerName">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Phone</label>
+                    <div class="value" id="phone">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Origin</label>
+                    <div class="value" id="origin">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Destination</label>
+                    <div class="value" id="destination">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Service</label>
+                    <div class="value" id="serviceType">-</div>
+                </div>
+                <div class="info-item">
+                    <label>Weight</label>
+                    <div class="value" id="weight">-</div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 20px;">📍 Tracking History</h3>
+            <div id="history"></div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGWqAOKQTuBnFtCjEq5CczzqcjS1mKjuM26VqYA0c8ioaZFmtj4JgwpfTZ3s3tNHoX/exec';
+
+        async function trackShipment() {
+            const trackingNumber = document.getElementById('trackingInput').value.trim();
+
+            if (!trackingNumber) {
+                alert('Please enter a tracking number');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?awb=' + encodeURIComponent(trackingNumber));
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (data.found) {
+                    document.getElementById('displayTracking').textContent = data.awb;
+                    document.getElementById('currentStatus').textContent = data.status || 'In Transit';
+
+                    // ✅ UPDATE: Mapping data lengkap dari API Baru
+                    document.getElementById('customerName').textContent = data.customer_name || '-';
+                    document.getElementById('phone').textContent = data.phone || '-';
+                    document.getElementById('origin').textContent = data.origin || '-';
+                    document.getElementById('destination').textContent = data.destination || '-';
+                    document.getElementById('serviceType').textContent = data.service_type || '-';
+                    // Handle weight formatting safely
+                    document.getElementById('weight').textContent = data.weight ? data.weight + ' kg' : '-';
+
+                    let historyHTML = '';
+                    if (data.history && data.history.length > 0) {
+                        data.history.forEach(item => {
+                            historyHTML += `
+                                <div class="history-item">
+                                    <div class="status">${item.status}</div>
+                                    <div class="details">${item.location} • ${item.timestamp}</div>
+                                    <div class="details">${item.notes || ''}</div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        historyHTML = '<p style="color: #7f8c8d; text-align: center;">No tracking history available yet.</p>';
+                    }
+                    document.getElementById('history').innerHTML = historyHTML;
+
+                    document.getElementById('result').style.display = 'block';
+                } else {
+                    document.getElementById('error').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        document.getElementById('trackingInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') trackShipment();
+        });
+    </script>
+</body>
+
+</html>

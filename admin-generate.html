@@ -109,6 +109,23 @@
 </head>
 
 <body>
+    <!-- Password Protection -->
+    <script>
+        // Simple password protection
+        const ADMIN_PASSWORD = 'ATR2026Admin!';
+        let isAuthenticated = sessionStorage.getItem('atr_admin_auth') === 'true';
+
+        if (!isAuthenticated) {
+            const password = prompt('🔐 Admin Access Required\n\nEnter password to continue:');
+            if (password !== ADMIN_PASSWORD) {
+                alert('❌ Incorrect password! Access denied.');
+                window.location.href = '/';
+            } else {
+                sessionStorage.setItem('atr_admin_auth', 'true');
+            }
+        }
+    </script>
+
     <div class="container">
         <div class="header">
             <h1>🚚 Generate Tracking Number</h1>
